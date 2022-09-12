@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tawazun-deploy
+  namespace: lama-tawazun
+  labels:
+    app: tawazun
+    service: tawazun-svc
+    name: lama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tawazun
+      service: tawazun-svc
+  template:
+    metadata:
+      labels:
+        app: tawazun
+        service: tawazun-svc
+    spec:
+      containers:
+        - image: lama/tawazun
+          name: tawazun
+          resources: 
+            requests: 
+              memory: 250Mi
+              cpu: "250m"
+            limits:
+              memory: 512Mi
+              cpu: "500m"
+          ports:
+            - containerPort: 8080
