@@ -1,46 +1,64 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sql
+  name: mysql-dep-pod
   namespace: lama-tawazun
   labels:
-    app: sql
-    name: lama
+    app: mysql
+    name: lamadb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sql
+      app: mysql
   template:
     metadata:
       labels:
-        app: sql
+        app: mysql
     spec:
-      volumes:
-        - name: sql-pv-claim
-          persistentVolumeClaim:
-            claimName: sql-pv-claim
       containers:
-        - image: mysql
+      - name: mysql
+        image: mysql:latest
+
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: tawazun-db
+        - name: MYSQL_DATABASE
+          value: lamadb
+        
+
+        ports:
+        - containerPort: 3306
           name: mysql
-          resources: 
-            requests: 
-              memory: 250Mi
-              cpu: "250m"
-            limits:
-              memory: 512Mi
-              cpu: "500m"
-          env:
-            - name: MYSQL_USER
-              value: "mysql"
-            - name: MYSQL_DATABASE
-              value: "mysql"
-            - name: MYSQL_PASSWORD
-              value: "mysql"
-            - name: MYSQL_ROOT_PASSWORD
-              value: "mysql"
-          ports:
-            - containerPort: 3306
-          volumeMounts:
-            - mountPath: /var/lib/mysql
-              name: sql-pv-claim
+
+        volumeMounts:
+        - name:  mysql-storage
+          mountPath: /var/lib/mysql  
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "1"
+          limits:
+            memory: "2Gi"
+            cpu: "2"
+        livenessProbe:
+          exec:
+            command:
+              - bash
+              - "-c"
+              - |
+                mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD ping &> /dev/null
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        startupProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 60
+          failureThreshold: 30
+          periodSeconds: 10
+          
+      volumes: 
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName:  mysql-pvc
