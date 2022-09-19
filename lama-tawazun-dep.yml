@@ -1,12 +1,12 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tawazun
+  name: tawazun-deployment
   namespace: lama-tawazun
   labels:
     app: tawazun
-    service: tawazun-svc
-    name: lama
+    name: lamaalawwad
 spec:
   replicas: 1
   selector:
@@ -15,19 +15,54 @@ spec:
       service: tawazun-svc
   template:
     metadata:
+      name: tawazun
       labels:
         app: tawazun
         service: tawazun-svc
     spec:
       containers:
-        - image: lama/tawazun
-          name: tawazun
-          resources: 
-            requests: 
-              memory: 250Mi
-              cpu: "250m"
-            limits:
-              memory: 512Mi
-              cpu: "500m"
-          ports:
-            - containerPort: 8080
+      - name: tawazun
+        image: lamaalawwad/tawazun:latest
+
+        ports:
+        - containerPort: 8080
+
+        env:
+        - name: DB_URL
+          value: mysql 
+        - name: DB_PORT
+          value: '3306'
+        - name: DB_NAME
+          value: lamadb
+        - name: DB_USERNAME
+          value: lamadb
+        - name: DB_PASSWORD
+          value: tawazun-db
+        
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "1"
+          limits:
+            memory: "2Gi"
+            cpu: "2"
+        startupProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          failureThreshold: 60
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        
