@@ -5,7 +5,7 @@ metadata:
   namespace: lama-tawazun
   labels:
     app: mysql
-    name: lamadb
+    name: lamaalawwad
 spec:
   replicas: 1
   selector:
