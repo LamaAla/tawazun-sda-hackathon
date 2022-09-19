@@ -3,15 +3,15 @@ kind: Service
 metadata:
   name: tawazun-svc
   namespace: lama-tawazun
-  labels: 
-    name: lama
-spec:
-  selector:
+  labels:
     app: tawazun
-    service: tawazun-svc
-    type: NodePort
-    ports:
-       - protocol: TCP
-         port: 8080
-         targetPort: 8080
-         nodePort: 30020
+    name: lamaalawwad
+spec:
+  type: NodePort  
+  selector:
+    app:  tawazun
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+    nodePort:  30000
